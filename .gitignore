@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+.plasmo/
+.cache/
+.env
+.env.local
+.DS_Store
+*.log
+coverage/
+.vscode/
+.idea/
+playwright-report/
+test-results/
