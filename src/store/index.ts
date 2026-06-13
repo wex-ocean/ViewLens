@@ -22,6 +22,10 @@ interface ViewLensStore {
   currentAnnotations: Annotation[]
   undoStack: Annotation[][]
   redoStack: Annotation[][]
+  isComparisonMode: boolean
+  comparisonUrls: { left: string; right: string }
+  comparisonLabels: { left: string; right: string }
+  comparisonSyncScroll: boolean
   setScreenshots: (screenshots: Screenshot[]) => void
   addScreenshot: (screenshot: Screenshot) => void
   removeScreenshot: (id: string) => void
@@ -46,6 +50,10 @@ interface ViewLensStore {
   undo: () => void
   redo: () => void
   clearAnnotations: () => void
+  setIsComparisonMode: (isComparisonMode: boolean) => void
+  setComparisonUrls: (urls: { left: string; right: string }) => void
+  setComparisonLabels: (labels: { left: string; right: string }) => void
+  setComparisonSyncScroll: (sync: boolean) => void
 }
 
 export const useViewLensStore = create<ViewLensStore>((set) => ({
@@ -69,6 +77,10 @@ export const useViewLensStore = create<ViewLensStore>((set) => ({
   currentAnnotations: [],
   undoStack: [],
   redoStack: [],
+  isComparisonMode: false,
+  comparisonUrls: { left: "https://example.com", right: "https://example.com" },
+  comparisonLabels: { left: "Production", right: "Staging" },
+  comparisonSyncScroll: true,
 
   setScreenshots: (screenshots) => set({ screenshots }),
 
@@ -175,5 +187,13 @@ export const useViewLensStore = create<ViewLensStore>((set) => ({
       undoStack: [...state.undoStack, state.currentAnnotations],
       redoStack: [],
       currentAnnotations: []
-    }))
+    })),
+
+  setIsComparisonMode: (isComparisonMode) => set({ isComparisonMode }),
+
+  setComparisonUrls: (urls) => set({ comparisonUrls: urls }),
+
+  setComparisonLabels: (labels) => set({ comparisonLabels: labels }),
+
+  setComparisonSyncScroll: (sync) => set({ comparisonSyncScroll: sync })
 }))

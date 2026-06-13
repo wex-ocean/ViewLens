@@ -10,7 +10,9 @@ import {
   MultiScreenToolbar,
   ExportToolbar,
   AnnotationCanvas,
-  AnnotationToolbar
+  AnnotationToolbar,
+  ComparisonView,
+  ComparisonToolbar
 } from "~components"
 import { useViewLensStore } from "~store"
 import { storage } from "~utils/storage"
@@ -35,6 +37,10 @@ function IndexPanel() {
     currentAnnotations,
     undoStack,
     redoStack,
+    isComparisonMode,
+    comparisonUrls,
+    comparisonLabels,
+    comparisonSyncScroll,
     setActiveMode,
     setSelectedDevice,
     setCurrentUrl,
@@ -51,7 +57,11 @@ function IndexPanel() {
     setCurrentAnnotations,
     undo,
     redo,
-    clearAnnotations
+    clearAnnotations,
+    setIsComparisonMode,
+    setComparisonUrls,
+    setComparisonLabels,
+    setComparisonSyncScroll
   } = useViewLensStore()
 
   useEffect(() => {
@@ -226,45 +236,106 @@ function IndexPanel() {
         </div>
       ) : (
         <div className="flex flex-1 flex-col overflow-hidden">
-          <AnnotationToolbar
-            tool={annotationTool}
-            color={annotationColor}
-            showAnnotations={true}
-            canUndo={undoStack.length > 0}
-            canRedo={redoStack.length > 0}
-            onToolChange={setAnnotationTool}
-            onColorChange={setAnnotationColor}
-            onToggleAnnotations={() => {}}
-            onUndo={undo}
-            onRedo={redo}
-            onClear={clearAnnotations}
-            onSave={handleSaveAnnotations}
-          />
+          <div className="flex items-center justify-between px-4 py-2 bg-muted/50 border-b border-border">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsComparisonMode(false)}
+                className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                  !isComparisonMode
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background border border-border hover:bg-accent"
+                }`}>
+                Annotation
+              </button>
+              <button
+                onClick={() => setIsComparisonMode(true)}
+                className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                  isComparisonMode
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background border border-border hover:bg-accent"
+                }`}>
+                Comparison
+              </button>
+            </div>
+          </div>
 
-          <div className="flex-1 relative bg-muted/30">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center space-y-4 p-8">
-                <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
-                  <span className="text-3xl">✏️</span>
-                </div>
-                <h2 className="text-2xl font-bold">QA Annotation Mode</h2>
-                <p className="text-muted-foreground max-w-md">
-                  Use the tools above to annotate screenshots. Draw rectangles, arrows, add text, or
-                  freehand draw to mark bugs and issues.
-                </p>
+          {isComparisonMode ? (
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <ComparisonToolbar
+                leftUrl={comparisonUrls.left}
+                rightUrl={comparisonUrls.right}
+                leftLabel={comparisonLabels.left}
+                rightLabel={comparisonLabels.right}
+                selectedDevice={selectedDevice}
+                syncScroll={comparisonSyncScroll}
+                onLeftUrlChange={(url) => setComparisonUrls({ ...comparisonUrls, left: url })}
+                onRightUrlChange={(url) => setComparisonUrls({ ...comparisonUrls, right: url })}
+                onLeftLabelChange={(label) =>
+                  setComparisonLabels({ ...comparisonLabels, left: label })
+                }
+                onRightLabelChange={(label) =>
+                  setComparisonLabels({ ...comparisonLabels, right: label })
+                }
+                onDeviceChange={setSelectedDevice}
+                onSwapUrls={() =>
+                  setComparisonUrls({ left: comparisonUrls.right, right: comparisonUrls.left })
+                }
+                onToggleSyncScroll={() => setComparisonSyncScroll(!comparisonSyncScroll)}
+              />
+              <div className="flex-1 overflow-hidden">
+                <ComparisonView
+                  leftUrl={comparisonUrls.left}
+                  rightUrl={comparisonUrls.right}
+                  leftLabel={comparisonLabels.left}
+                  rightLabel={comparisonLabels.right}
+                  device={selectedDevice}
+                  syncScroll={comparisonSyncScroll}
+                />
               </div>
             </div>
+          ) : (
+            <>
+              <AnnotationToolbar
+                tool={annotationTool}
+                color={annotationColor}
+                showAnnotations={true}
+                canUndo={undoStack.length > 0}
+                canRedo={redoStack.length > 0}
+                onToolChange={setAnnotationTool}
+                onColorChange={setAnnotationColor}
+                onToggleAnnotations={() => {}}
+                onUndo={undo}
+                onRedo={redo}
+                onClear={clearAnnotations}
+                onSave={handleSaveAnnotations}
+              />
 
-            <AnnotationCanvas
-              width={800}
-              height={600}
-              annotations={currentAnnotations}
-              tool={annotationTool}
-              color={annotationColor}
-              onAnnotationAdd={addCurrentAnnotation}
-              showAnnotations={true}
-            />
-          </div>
+              <div className="flex-1 relative bg-muted/30">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center space-y-4 p-8">
+                    <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
+                      <span className="text-3xl">✏️</span>
+                    </div>
+                    <h2 className="text-2xl font-bold">QA Annotation Mode</h2>
+                    <p className="text-muted-foreground max-w-md">
+                      Use the tools above to annotate screenshots. Draw rectangles, arrows, add
+                      text, or freehand draw to mark bugs and issues.
+                    </p>
+                  </div>
+                </div>
+
+                <AnnotationCanvas
+                  width={800}
+                  height={600}
+                  annotations={currentAnnotations}
+                  tool={annotationTool}
+                  color={annotationColor}
+                  onAnnotationAdd={addCurrentAnnotation}
+                  showAnnotations={true}
+                />
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>

@@ -1,5 +1,7 @@
 export { AnnotationCanvas } from "./AnnotationCanvas"
 export { AnnotationToolbar } from "./AnnotationToolbar"
+export { ComparisonView } from "./ComparisonView"
+export { ComparisonToolbar } from "./ComparisonToolbar"
 export { DeviceFrame } from "./DeviceFrame"
 export { DeviceSelector } from "./DeviceSelector"
 export { UrlBar } from "./UrlBar"
