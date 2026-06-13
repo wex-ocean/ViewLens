@@ -1,17 +1,21 @@
 interface MultiScreenToolbarProps {
   isMultiScreen: boolean
   deviceCount: number
+  isSyncScroll?: boolean
   onToggleMultiScreen: () => void
   onAddDevice: () => void
   onRemoveDevice: () => void
+  onToggleSyncScroll?: () => void
 }
 
 export const MultiScreenToolbar = ({
   isMultiScreen,
   deviceCount,
+  isSyncScroll = false,
   onToggleMultiScreen,
   onAddDevice,
-  onRemoveDevice
+  onRemoveDevice,
+  onToggleSyncScroll
 }: MultiScreenToolbarProps) => {
   return (
     <div className="flex items-center gap-2 px-4 py-2 bg-muted/50 border-b border-border">
@@ -87,6 +91,32 @@ export const MultiScreenToolbar = ({
               </svg>
             </button>
           </div>
+
+          {onToggleSyncScroll && (
+            <button
+              onClick={onToggleSyncScroll}
+              className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors ${
+                isSyncScroll
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-background border border-border hover:bg-accent"
+              }`}
+              title="Sync scroll across devices">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round">
+                <path d="M21 12a9 9 0 11-6.219-8.56" />
+                <polyline points="17 8 21 4 21 8" />
+              </svg>
+              Sync Scroll
+            </button>
+          )}
         </>
       )}
     </div>

@@ -21,6 +21,7 @@ function IndexPanel() {
     customBreakpoints,
     isMultiScreen,
     multiScreenDevices,
+    isSyncScroll,
     setActiveMode,
     setSelectedDevice,
     setCurrentUrl,
@@ -29,7 +30,8 @@ function IndexPanel() {
     setIsMultiScreen,
     addMultiScreenDevice,
     removeMultiScreenDevice,
-    updateMultiScreenDevice
+    updateMultiScreenDevice,
+    setIsSyncScroll
   } = useViewLensStore()
 
   useEffect(() => {
@@ -50,9 +52,11 @@ function IndexPanel() {
           <MultiScreenToolbar
             isMultiScreen={isMultiScreen}
             deviceCount={multiScreenDevices.length}
+            isSyncScroll={isSyncScroll}
             onToggleMultiScreen={() => setIsMultiScreen(!isMultiScreen)}
             onAddDevice={addMultiScreenDevice}
             onRemoveDevice={removeMultiScreenDevice}
+            onToggleSyncScroll={() => setIsSyncScroll(!isSyncScroll)}
           />
 
           <div className="flex flex-1 overflow-hidden">
@@ -116,6 +120,7 @@ function IndexPanel() {
                     url={currentUrl}
                     devices={multiScreenDevices}
                     onDeviceChange={updateMultiScreenDevice}
+                    syncScroll={isSyncScroll}
                   />
                 ) : (
                   <DeviceFrame

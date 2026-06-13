@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from "react"
 import type { DeviceFrameProps } from "~types"
+import { injectScrollListener } from "~utils/scrollSync"
+
+interface ExtendedDeviceFrameProps extends DeviceFrameProps {
+  syncScroll?: boolean
+  onScroll?: (scrollX: number, scrollY: number) => void
+  scrollTo?: { x: number; y: number }
+}
 
 export const DeviceFrame = ({
   url,
@@ -7,8 +14,11 @@ export const DeviceFrame = ({
   height,
   scale,
   label,
-  rotating = false
-}: DeviceFrameProps) => {
+  rotating = false,
+  syncScroll = false,
+  onScroll,
+  scrollTo
+}: ExtendedDeviceFrameProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [calculatedScale, setCalculatedScale] = useState(scale || 1)
@@ -45,9 +55,47 @@ export const DeviceFrame = ({
     return () => observer.disconnect()
   }, [scale, currentWidth, currentHeight])
 
+  useEffect(() => {
+    if (!syncScroll || !iframeRef.current || !onScroll) return
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === "IFRAME_SCROLL") {
+        onScroll(event.data.scrollX, event.data.scrollY)
+      }
+    }
+
+    window.addEventListener("message", handleMessage)
+    return () => window.removeEventListener("message", handleMessage)
+  }, [syncScroll, onScroll])
+
+  useEffect(() => {
+    if (!scrollTo || !iframeRef.current) return
+
+    try {
+      iframeRef.current.contentWindow?.postMessage(
+        {
+          type: "SYNC_SCROLL",
+          scrollX: scrollTo.x,
+          scrollY: scrollTo.y
+        },
+        "*"
+      )
+    } catch (error) {
+      console.warn("Could not sync scroll:", error)
+    }
+  }, [scrollTo])
+
   const handleIframeLoad = () => {
     setIsLoading(false)
     setHasError(false)
+
+    if (syncScroll && iframeRef.current && onScroll) {
+      setTimeout(() => {
+        if (iframeRef.current) {
+          injectScrollListener(iframeRef.current, onScroll)
+        }
+      }, 100)
+    }
   }
 
   const handleIframeError = () => {

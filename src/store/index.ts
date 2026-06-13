@@ -16,6 +16,7 @@ interface ViewLensStore {
   customBreakpoints: BreakpointConfig[]
   isMultiScreen: boolean
   multiScreenDevices: DevicePreset[]
+  isSyncScroll: boolean
   setScreenshots: (screenshots: Screenshot[]) => void
   addScreenshot: (screenshot: Screenshot) => void
   removeScreenshot: (id: string) => void
@@ -32,6 +33,7 @@ interface ViewLensStore {
   addMultiScreenDevice: () => void
   removeMultiScreenDevice: () => void
   updateMultiScreenDevice: (index: number, device: DevicePreset) => void
+  setIsSyncScroll: (isSyncScroll: boolean) => void
 }
 
 export const useViewLensStore = create<ViewLensStore>((set) => ({
@@ -49,6 +51,7 @@ export const useViewLensStore = create<ViewLensStore>((set) => ({
   customBreakpoints: [],
   isMultiScreen: false,
   multiScreenDevices: [DEVICE_PRESETS.iphone14Pro, DEVICE_PRESETS.ipadPro12],
+  isSyncScroll: false,
 
   setScreenshots: (screenshots) => set({ screenshots }),
 
@@ -111,5 +114,7 @@ export const useViewLensStore = create<ViewLensStore>((set) => ({
   updateMultiScreenDevice: (index, device) =>
     set((state) => ({
       multiScreenDevices: state.multiScreenDevices.map((d, i) => (i === index ? device : d))
-    }))
+    })),
+
+  setIsSyncScroll: (isSyncScroll) => set({ isSyncScroll })
 }))
