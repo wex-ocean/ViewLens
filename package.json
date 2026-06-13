@@ -66,5 +66,8 @@
     "host_permissions": [
       "<all_urls>"
     ]
+  },
+  "optionalDependencies": {
+    "@parcel/watcher": "^2.2.0"
   }
 }
