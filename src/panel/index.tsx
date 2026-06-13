@@ -1,6 +1,14 @@
 import "~style.css"
 import { useEffect } from "react"
-import { Navbar, DeviceFrame, DeviceSelector, UrlBar, BreakpointChecker } from "~components"
+import {
+  Navbar,
+  DeviceFrame,
+  DeviceSelector,
+  UrlBar,
+  BreakpointChecker,
+  MultiScreenView,
+  MultiScreenToolbar
+} from "~components"
 import { useViewLensStore } from "~store"
 import { storage } from "~utils/storage"
 
@@ -11,11 +19,17 @@ function IndexPanel() {
     currentUrl,
     isRotated,
     customBreakpoints,
+    isMultiScreen,
+    multiScreenDevices,
     setActiveMode,
     setSelectedDevice,
     setCurrentUrl,
     setIsRotated,
-    setCustomBreakpoints
+    setCustomBreakpoints,
+    setIsMultiScreen,
+    addMultiScreenDevice,
+    removeMultiScreenDevice,
+    updateMultiScreenDevice
   } = useViewLensStore()
 
   useEffect(() => {
@@ -32,67 +46,87 @@ function IndexPanel() {
       <Navbar activeMode={activeMode} onModeSwitch={setActiveMode} />
 
       {activeMode === "dev" ? (
-        <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar */}
-          <div className="w-80 border-r border-border bg-muted/50 p-4 flex flex-col gap-4 overflow-y-auto">
-            <div>
-              <label className="block text-sm font-medium mb-2">Device</label>
-              <DeviceSelector selectedDevice={selectedDevice} onSelect={setSelectedDevice} />
-            </div>
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <MultiScreenToolbar
+            isMultiScreen={isMultiScreen}
+            deviceCount={multiScreenDevices.length}
+            onToggleMultiScreen={() => setIsMultiScreen(!isMultiScreen)}
+            onAddDevice={addMultiScreenDevice}
+            onRemoveDevice={removeMultiScreenDevice}
+          />
 
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Rotate</span>
-              <button
-                onClick={() => setIsRotated(!isRotated)}
-                className={`px-3 py-1 text-xs rounded-md border transition-colors ${
-                  isRotated
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background border-border hover:bg-accent"
-                }`}>
-                {isRotated ? "Portrait" : "Landscape"}
-              </button>
-            </div>
+          <div className="flex flex-1 overflow-hidden">
+            {!isMultiScreen && (
+              <div className="w-80 border-r border-border bg-muted/50 p-4 flex flex-col gap-4 overflow-y-auto">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Device</label>
+                  <DeviceSelector selectedDevice={selectedDevice} onSelect={setSelectedDevice} />
+                </div>
 
-            <div className="pt-4 border-t border-border">
-              <h3 className="text-sm font-semibold mb-3">Device Info</h3>
-              <div className="space-y-2 text-xs text-muted-foreground">
-                <div className="flex justify-between">
-                  <span>Width:</span>
-                  <span className="font-mono">{currentWidth}px</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Rotate</span>
+                  <button
+                    onClick={() => setIsRotated(!isRotated)}
+                    className={`px-3 py-1 text-xs rounded-md border transition-colors ${
+                      isRotated
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background border-border hover:bg-accent"
+                    }`}>
+                    {isRotated ? "Portrait" : "Landscape"}
+                  </button>
                 </div>
-                <div className="flex justify-between">
-                  <span>Height:</span>
-                  <span className="font-mono">{currentHeight}px</span>
+
+                <div className="pt-4 border-t border-border">
+                  <h3 className="text-sm font-semibold mb-3">Device Info</h3>
+                  <div className="space-y-2 text-xs text-muted-foreground">
+                    <div className="flex justify-between">
+                      <span>Width:</span>
+                      <span className="font-mono">{currentWidth}px</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Height:</span>
+                      <span className="font-mono">{currentHeight}px</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Orientation:</span>
+                      <span>{isRotated ? "Portrait" : "Landscape"}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>Orientation:</span>
-                  <span>{isRotated ? "Portrait" : "Landscape"}</span>
+
+                <div className="pt-4 border-t border-border">
+                  <BreakpointChecker
+                    currentWidth={currentWidth}
+                    customBreakpoints={customBreakpoints}
+                    onCustomBreakpointsChange={setCustomBreakpoints}
+                  />
                 </div>
               </div>
-            </div>
+            )}
 
-            <div className="pt-4 border-t border-border">
-              <BreakpointChecker
-                currentWidth={currentWidth}
-                customBreakpoints={customBreakpoints}
-                onCustomBreakpointsChange={setCustomBreakpoints}
-              />
-            </div>
-          </div>
-
-          {/* Main Area */}
-          <div className="flex-1 flex flex-col">
-            <div className="p-4 border-b border-border bg-background">
-              <UrlBar currentUrl={currentUrl} onUrlChange={setCurrentUrl} />
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <DeviceFrame
-                url={currentUrl}
-                width={currentWidth}
-                height={currentHeight}
-                label={selectedDevice.label}
-                rotating
-              />
+            <div className="flex-1 flex flex-col">
+              {!isMultiScreen && (
+                <div className="p-4 border-b border-border bg-background">
+                  <UrlBar currentUrl={currentUrl} onUrlChange={setCurrentUrl} />
+                </div>
+              )}
+              <div className="flex-1 overflow-hidden">
+                {isMultiScreen ? (
+                  <MultiScreenView
+                    url={currentUrl}
+                    devices={multiScreenDevices}
+                    onDeviceChange={updateMultiScreenDevice}
+                  />
+                ) : (
+                  <DeviceFrame
+                    url={currentUrl}
+                    width={currentWidth}
+                    height={currentHeight}
+                    label={selectedDevice.label}
+                    rotating
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>

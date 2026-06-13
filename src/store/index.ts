@@ -14,6 +14,8 @@ interface ViewLensStore {
   isRotated: boolean
   activeMode: "dev" | "qa"
   customBreakpoints: BreakpointConfig[]
+  isMultiScreen: boolean
+  multiScreenDevices: DevicePreset[]
   setScreenshots: (screenshots: Screenshot[]) => void
   addScreenshot: (screenshot: Screenshot) => void
   removeScreenshot: (id: string) => void
@@ -26,6 +28,10 @@ interface ViewLensStore {
   setIsRotated: (isRotated: boolean) => void
   setActiveMode: (mode: "dev" | "qa") => void
   setCustomBreakpoints: (breakpoints: BreakpointConfig[]) => void
+  setIsMultiScreen: (isMultiScreen: boolean) => void
+  addMultiScreenDevice: () => void
+  removeMultiScreenDevice: () => void
+  updateMultiScreenDevice: (index: number, device: DevicePreset) => void
 }
 
 export const useViewLensStore = create<ViewLensStore>((set) => ({
@@ -41,6 +47,8 @@ export const useViewLensStore = create<ViewLensStore>((set) => ({
   isRotated: false,
   activeMode: "dev",
   customBreakpoints: [],
+  isMultiScreen: false,
+  multiScreenDevices: [DEVICE_PRESETS.iphone14Pro, DEVICE_PRESETS.ipadPro12],
 
   setScreenshots: (screenshots) => set({ screenshots }),
 
@@ -80,5 +88,28 @@ export const useViewLensStore = create<ViewLensStore>((set) => ({
     storage.set("activeMode", mode)
   },
 
-  setCustomBreakpoints: (breakpoints) => set({ customBreakpoints: breakpoints })
+  setCustomBreakpoints: (breakpoints) => set({ customBreakpoints: breakpoints }),
+
+  setIsMultiScreen: (isMultiScreen) => set({ isMultiScreen }),
+
+  addMultiScreenDevice: () =>
+    set((state) => {
+      if (state.multiScreenDevices.length >= 4) return state
+      return {
+        multiScreenDevices: [...state.multiScreenDevices, DEVICE_PRESETS.mobile]
+      }
+    }),
+
+  removeMultiScreenDevice: () =>
+    set((state) => {
+      if (state.multiScreenDevices.length <= 2) return state
+      return {
+        multiScreenDevices: state.multiScreenDevices.slice(0, -1)
+      }
+    }),
+
+  updateMultiScreenDevice: (index, device) =>
+    set((state) => ({
+      multiScreenDevices: state.multiScreenDevices.map((d, i) => (i === index ? device : d))
+    }))
 }))
