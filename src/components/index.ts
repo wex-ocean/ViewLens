@@ -1,4 +1,6 @@
 export { AnnotationCanvas } from "./AnnotationCanvas"
 export { DeviceFrame } from "./DeviceFrame"
+export { DeviceSelector } from "./DeviceSelector"
+export { UrlBar } from "./UrlBar"
 export { Button } from "./ui/button"
 export { Card, CardHeader, CardTitle, CardContent } from "./ui/card"

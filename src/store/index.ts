@@ -1,10 +1,15 @@
 import { create } from "zustand"
 import type { Annotation, Screenshot, Settings } from "~types"
+import type { DevicePreset } from "~utils/devices"
+import { DEVICE_PRESETS } from "~utils/devices"
 
 interface ViewLensStore {
   screenshots: Screenshot[]
   settings: Settings
   annotationMode: boolean
+  selectedDevice: DevicePreset
+  currentUrl: string
+  isRotated: boolean
   setScreenshots: (screenshots: Screenshot[]) => void
   addScreenshot: (screenshot: Screenshot) => void
   removeScreenshot: (id: string) => void
@@ -12,6 +17,9 @@ interface ViewLensStore {
   setSettings: (settings: Partial<Settings>) => void
   toggleAnnotationMode: () => void
   addAnnotation: (screenshotId: string, annotation: Annotation) => void
+  setSelectedDevice: (device: DevicePreset) => void
+  setCurrentUrl: (url: string) => void
+  setIsRotated: (isRotated: boolean) => void
 }
 
 export const useViewLensStore = create<ViewLensStore>((set) => ({
@@ -22,6 +30,9 @@ export const useViewLensStore = create<ViewLensStore>((set) => ({
     autoSave: true
   },
   annotationMode: false,
+  selectedDevice: DEVICE_PRESETS.iphone14Pro,
+  currentUrl: "https://example.com",
+  isRotated: false,
 
   setScreenshots: (screenshots) => set({ screenshots }),
 
@@ -48,5 +59,11 @@ export const useViewLensStore = create<ViewLensStore>((set) => ({
           ? { ...s, annotations: [...(s.annotations || []), annotation] }
           : s
       )
-    }))
+    })),
+
+  setSelectedDevice: (device) => set({ selectedDevice: device }),
+
+  setCurrentUrl: (url) => set({ currentUrl: url }),
+
+  setIsRotated: (isRotated) => set({ isRotated })
 }))
