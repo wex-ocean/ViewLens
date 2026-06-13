@@ -30,3 +30,12 @@ export interface Settings {
 }
 
 export type StorageKey = "screenshots" | "settings" | "state"
+
+export interface DeviceFrameProps {
+  url: string
+  width: number
+  height: number
+  scale?: number
+  label?: string
+  rotating?: boolean
+}
