@@ -7,10 +7,15 @@ import {
   UrlBar,
   BreakpointChecker,
   MultiScreenView,
-  MultiScreenToolbar
+  MultiScreenToolbar,
+  ExportToolbar
 } from "~components"
 import { useViewLensStore } from "~store"
 import { storage } from "~utils/storage"
+import { captureScreenshot, generateScreenshotFilename, downloadScreenshot } from "~utils/screenshot"
+import { exportToPDF } from "~utils/pdf"
+import { exportToZip } from "~utils/zipExport"
+import type { Screenshot } from "~types"
 
 function IndexPanel() {
   const {
@@ -43,6 +48,51 @@ function IndexPanel() {
   const currentWidth = isRotated ? selectedDevice.height : selectedDevice.width
   const currentHeight = isRotated ? selectedDevice.width : selectedDevice.height
 
+  const handleScreenshotCurrent = async () => {
+    const screenshot = await captureScreenshot(selectedDevice.label)
+    const filename = generateScreenshotFilename(selectedDevice.label, screenshot.timestamp)
+    downloadScreenshot(screenshot.dataUrl, filename)
+  }
+
+  const handleScreenshotAll = async () => {
+    for (const device of multiScreenDevices) {
+      const screenshot = await captureScreenshot(device.label)
+      const filename = generateScreenshotFilename(device.label, screenshot.timestamp)
+      downloadScreenshot(screenshot.dataUrl, filename)
+      await new Promise((resolve) => setTimeout(resolve, 500))
+    }
+  }
+
+  const handleExportPDF = async () => {
+    const screenshots: Screenshot[] = []
+    const devices = isMultiScreen ? multiScreenDevices : [selectedDevice]
+    
+    for (const device of devices) {
+      const screenshot = await captureScreenshot(device.label)
+      screenshots.push(screenshot)
+      await new Promise((resolve) => setTimeout(resolve, 300))
+    }
+    
+    await exportToPDF(screenshots, currentUrl)
+  }
+
+  const handleExportZIP = async () => {
+    const exports: any[] = []
+    const devices = isMultiScreen ? multiScreenDevices : [selectedDevice]
+    
+    for (const device of devices) {
+      const screenshot = await captureScreenshot(device.label)
+      exports.push({
+        deviceLabel: device.label,
+        dataUrl: screenshot.dataUrl,
+        timestamp: screenshot.timestamp
+      })
+      await new Promise((resolve) => setTimeout(resolve, 300))
+    }
+    
+    await exportToZip(exports)
+  }
+
   return (
     <div className="w-full h-screen flex flex-col bg-background">
       <Navbar activeMode={activeMode} onModeSwitch={setActiveMode} />
@@ -57,6 +107,14 @@ function IndexPanel() {
             onAddDevice={addMultiScreenDevice}
             onRemoveDevice={removeMultiScreenDevice}
             onToggleSyncScroll={() => setIsSyncScroll(!isSyncScroll)}
+          />
+
+          <ExportToolbar
+            isMultiScreen={isMultiScreen}
+            onScreenshotCurrent={handleScreenshotCurrent}
+            onScreenshotAll={handleScreenshotAll}
+            onExportPDF={handleExportPDF}
+            onExportZIP={handleExportZIP}
           />
 
           <div className="flex flex-1 overflow-hidden">
