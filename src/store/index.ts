@@ -1,6 +1,7 @@
 import { create } from "zustand"
 import type { Annotation, Screenshot, Settings } from "~types"
 import type { DevicePreset } from "~utils/devices"
+import type { BreakpointConfig } from "~utils/breakpoints"
 import { DEVICE_PRESETS } from "~utils/devices"
 import { storage } from "~utils/storage"
 
@@ -12,6 +13,7 @@ interface ViewLensStore {
   currentUrl: string
   isRotated: boolean
   activeMode: "dev" | "qa"
+  customBreakpoints: BreakpointConfig[]
   setScreenshots: (screenshots: Screenshot[]) => void
   addScreenshot: (screenshot: Screenshot) => void
   removeScreenshot: (id: string) => void
@@ -23,6 +25,7 @@ interface ViewLensStore {
   setCurrentUrl: (url: string) => void
   setIsRotated: (isRotated: boolean) => void
   setActiveMode: (mode: "dev" | "qa") => void
+  setCustomBreakpoints: (breakpoints: BreakpointConfig[]) => void
 }
 
 export const useViewLensStore = create<ViewLensStore>((set) => ({
@@ -37,6 +40,7 @@ export const useViewLensStore = create<ViewLensStore>((set) => ({
   currentUrl: "https://example.com",
   isRotated: false,
   activeMode: "dev",
+  customBreakpoints: [],
 
   setScreenshots: (screenshots) => set({ screenshots }),
 
@@ -74,5 +78,7 @@ export const useViewLensStore = create<ViewLensStore>((set) => ({
   setActiveMode: (mode) => {
     set({ activeMode: mode })
     storage.set("activeMode", mode)
-  }
+  },
+
+  setCustomBreakpoints: (breakpoints) => set({ customBreakpoints: breakpoints })
 }))

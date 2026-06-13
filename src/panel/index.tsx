@@ -1,6 +1,6 @@
 import "~style.css"
 import { useEffect } from "react"
-import { Navbar, DeviceFrame, DeviceSelector, UrlBar } from "~components"
+import { Navbar, DeviceFrame, DeviceSelector, UrlBar, BreakpointChecker } from "~components"
 import { useViewLensStore } from "~store"
 import { storage } from "~utils/storage"
 
@@ -10,10 +10,12 @@ function IndexPanel() {
     selectedDevice,
     currentUrl,
     isRotated,
+    customBreakpoints,
     setActiveMode,
     setSelectedDevice,
     setCurrentUrl,
-    setIsRotated
+    setIsRotated,
+    setCustomBreakpoints
   } = useViewLensStore()
 
   useEffect(() => {
@@ -21,6 +23,9 @@ function IndexPanel() {
       if (mode) setActiveMode(mode)
     })
   }, [])
+
+  const currentWidth = isRotated ? selectedDevice.height : selectedDevice.width
+  const currentHeight = isRotated ? selectedDevice.width : selectedDevice.height
 
   return (
     <div className="w-full h-screen flex flex-col bg-background">
@@ -53,21 +58,25 @@ function IndexPanel() {
               <div className="space-y-2 text-xs text-muted-foreground">
                 <div className="flex justify-between">
                   <span>Width:</span>
-                  <span className="font-mono">
-                    {isRotated ? selectedDevice.height : selectedDevice.width}px
-                  </span>
+                  <span className="font-mono">{currentWidth}px</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Height:</span>
-                  <span className="font-mono">
-                    {isRotated ? selectedDevice.width : selectedDevice.height}px
-                  </span>
+                  <span className="font-mono">{currentHeight}px</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Orientation:</span>
                   <span>{isRotated ? "Portrait" : "Landscape"}</span>
                 </div>
               </div>
+            </div>
+
+            <div className="pt-4 border-t border-border">
+              <BreakpointChecker
+                currentWidth={currentWidth}
+                customBreakpoints={customBreakpoints}
+                onCustomBreakpointsChange={setCustomBreakpoints}
+              />
             </div>
           </div>
 
@@ -79,8 +88,8 @@ function IndexPanel() {
             <div className="flex-1 overflow-hidden">
               <DeviceFrame
                 url={currentUrl}
-                width={isRotated ? selectedDevice.height : selectedDevice.width}
-                height={isRotated ? selectedDevice.width : selectedDevice.height}
+                width={currentWidth}
+                height={currentHeight}
                 label={selectedDevice.label}
                 rotating
               />
