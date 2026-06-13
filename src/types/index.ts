@@ -30,7 +30,13 @@ export interface Settings {
   autoSave: boolean
 }
 
-export type StorageKey = "screenshots" | "settings" | "state" | "activeMode"
+export type StorageKey = "screenshots" | "settings" | "state" | "activeMode" | "customPresets" | "urlHistory"
+
+export interface UrlHistoryItem {
+  id: string
+  url: string
+  timestamp: number
+}
 
 export interface DeviceFrameProps {
   url: string

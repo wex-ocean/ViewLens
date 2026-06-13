@@ -26,6 +26,8 @@ interface ViewLensStore {
   comparisonUrls: { left: string; right: string }
   comparisonLabels: { left: string; right: string }
   comparisonSyncScroll: boolean
+  customPresets: DevicePreset[]
+  urlHistory: { id: string; url: string; timestamp: number }[]
   setScreenshots: (screenshots: Screenshot[]) => void
   addScreenshot: (screenshot: Screenshot) => void
   removeScreenshot: (id: string) => void
@@ -54,6 +56,11 @@ interface ViewLensStore {
   setComparisonUrls: (urls: { left: string; right: string }) => void
   setComparisonLabels: (labels: { left: string; right: string }) => void
   setComparisonSyncScroll: (sync: boolean) => void
+  addCustomPreset: (preset: DevicePreset) => void
+  removeCustomPreset: (id: string) => void
+  setCustomPresets: (presets: DevicePreset[]) => void
+  addUrlHistory: (item: { id: string; url: string; timestamp: number }) => void
+  setUrlHistory: (history: { id: string; url: string; timestamp: number }[]) => void
 }
 
 export const useViewLensStore = create<ViewLensStore>((set) => ({
@@ -81,6 +88,8 @@ export const useViewLensStore = create<ViewLensStore>((set) => ({
   comparisonUrls: { left: "https://example.com", right: "https://example.com" },
   comparisonLabels: { left: "Production", right: "Staging" },
   comparisonSyncScroll: true,
+  customPresets: [],
+  urlHistory: [],
 
   setScreenshots: (screenshots) => set({ screenshots }),
 
@@ -195,5 +204,19 @@ export const useViewLensStore = create<ViewLensStore>((set) => ({
 
   setComparisonLabels: (labels) => set({ comparisonLabels: labels }),
 
-  setComparisonSyncScroll: (sync) => set({ comparisonSyncScroll: sync })
+  setComparisonSyncScroll: (sync) => set({ comparisonSyncScroll: sync }),
+
+  addCustomPreset: (preset) => set((state) => ({ customPresets: [...state.customPresets, preset] })),
+
+  removeCustomPreset: (id) =>
+    set((state) => ({ customPresets: state.customPresets.filter((p) => p.id !== id) })),
+
+  setCustomPresets: (presets) => set({ customPresets: presets }),
+
+  addUrlHistory: (item) =>
+    set((state) => ({
+      urlHistory: [item, ...state.urlHistory.filter((h) => h.url !== item.url)].slice(0, 20)
+    })),
+
+  setUrlHistory: (history) => set({ urlHistory: history })
 }))

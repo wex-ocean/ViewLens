@@ -1,13 +1,14 @@
 import { useState } from "react"
-import { getDevicesByCategory } from "~utils/devices"
+import { getDevicesByCategory, DEVICE_PRESETS } from "~utils/devices"
 import type { DevicePreset } from "~utils/devices"
 
 interface DeviceSelectorProps {
   selectedDevice: DevicePreset
   onSelect: (device: DevicePreset) => void
+  customPresets?: DevicePreset[]
 }
 
-export const DeviceSelector = ({ selectedDevice, onSelect }: DeviceSelectorProps) => {
+export const DeviceSelector = ({ selectedDevice, onSelect, customPresets = [] }: DeviceSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const categories = getDevicesByCategory()
 
@@ -32,6 +33,31 @@ export const DeviceSelector = ({ selectedDevice, onSelect }: DeviceSelectorProps
             onClick={() => setIsOpen(false)}
           />
           <div className="absolute top-full left-0 mt-1 w-80 bg-background border border-border rounded-md shadow-lg z-20 max-h-96 overflow-y-auto">
+            {customPresets.length > 0 && (
+              <div className="py-2">
+                <div className="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase">
+                  Custom
+                </div>
+                {customPresets.map((device) => (
+                  <button
+                    key={device.label}
+                    onClick={() => {
+                      onSelect(device)
+                      setIsOpen(false)
+                    }}
+                    className={`w-full px-4 py-2 text-left hover:bg-accent transition-colors ${
+                      selectedDevice.label === device.label ? "bg-secondary" : ""
+                    }`}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{device.label}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {device.width} × {device.height}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
             {Object.entries(categories).map(([category, devices]) => (
               <div key={category} className="py-2">
                 <div className="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase">
