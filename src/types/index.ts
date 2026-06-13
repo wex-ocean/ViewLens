@@ -14,11 +14,12 @@ export interface Screenshot {
 
 export interface Annotation {
   id: string
-  type: "rectangle" | "circle" | "arrow" | "text"
+  type: "rectangle" | "circle" | "arrow" | "text" | "freehand"
   x: number
   y: number
   width?: number
   height?: number
+  points?: number[]
   text?: string
   color: string
 }

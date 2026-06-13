@@ -1,4 +1,5 @@
 export { AnnotationCanvas } from "./AnnotationCanvas"
+export { AnnotationToolbar } from "./AnnotationToolbar"
 export { DeviceFrame } from "./DeviceFrame"
 export { DeviceSelector } from "./DeviceSelector"
 export { UrlBar } from "./UrlBar"

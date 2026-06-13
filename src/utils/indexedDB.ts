@@ -71,6 +71,19 @@ class IndexedDBUtil {
       request.onerror = () => reject(request.error)
     })
   }
+
+  async saveAnnotations(key: string, annotations: any[]): Promise<void> {
+    return this.save(key, annotations)
+  }
+
+  async loadAnnotations(key: string): Promise<any[]> {
+    const result = await this.get<any[]>(key)
+    return result || []
+  }
+
+  async deleteAnnotations(key: string): Promise<void> {
+    return this.delete(key)
+  }
 }
 
 export const db = new IndexedDBUtil()

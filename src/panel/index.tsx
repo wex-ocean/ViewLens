@@ -8,13 +8,16 @@ import {
   BreakpointChecker,
   MultiScreenView,
   MultiScreenToolbar,
-  ExportToolbar
+  ExportToolbar,
+  AnnotationCanvas,
+  AnnotationToolbar
 } from "~components"
 import { useViewLensStore } from "~store"
 import { storage } from "~utils/storage"
 import { captureScreenshot, generateScreenshotFilename, downloadScreenshot } from "~utils/screenshot"
 import { exportToPDF } from "~utils/pdf"
 import { exportToZip } from "~utils/zipExport"
+import { db } from "~utils/indexedDB"
 import type { Screenshot } from "~types"
 
 function IndexPanel() {
@@ -27,6 +30,11 @@ function IndexPanel() {
     isMultiScreen,
     multiScreenDevices,
     isSyncScroll,
+    annotationTool,
+    annotationColor,
+    currentAnnotations,
+    undoStack,
+    redoStack,
     setActiveMode,
     setSelectedDevice,
     setCurrentUrl,
@@ -36,7 +44,14 @@ function IndexPanel() {
     addMultiScreenDevice,
     removeMultiScreenDevice,
     updateMultiScreenDevice,
-    setIsSyncScroll
+    setIsSyncScroll,
+    setAnnotationTool,
+    setAnnotationColor,
+    addCurrentAnnotation,
+    setCurrentAnnotations,
+    undo,
+    redo,
+    clearAnnotations
   } = useViewLensStore()
 
   useEffect(() => {
@@ -44,6 +59,22 @@ function IndexPanel() {
       if (mode) setActiveMode(mode)
     })
   }, [])
+
+  useEffect(() => {
+    const loadAnnotations = async () => {
+      const key = `${currentUrl}-${selectedDevice.label}`
+      const annotations = await db.loadAnnotations(key)
+      if (annotations.length > 0) {
+        setCurrentAnnotations(annotations)
+      }
+    }
+    loadAnnotations()
+  }, [currentUrl, selectedDevice.label])
+
+  const handleSaveAnnotations = async () => {
+    const key = `${currentUrl}-${selectedDevice.label}`
+    await db.saveAnnotations(key, currentAnnotations)
+  }
 
   const currentWidth = isRotated ? selectedDevice.height : selectedDevice.width
   const currentHeight = isRotated ? selectedDevice.width : selectedDevice.height
@@ -194,16 +225,45 @@ function IndexPanel() {
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex items-center justify-center bg-muted/30">
-          <div className="text-center space-y-4 p-8">
-            <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
-              <span className="text-3xl">🚧</span>
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <AnnotationToolbar
+            tool={annotationTool}
+            color={annotationColor}
+            showAnnotations={true}
+            canUndo={undoStack.length > 0}
+            canRedo={redoStack.length > 0}
+            onToolChange={setAnnotationTool}
+            onColorChange={setAnnotationColor}
+            onToggleAnnotations={() => {}}
+            onUndo={undo}
+            onRedo={redo}
+            onClear={clearAnnotations}
+            onSave={handleSaveAnnotations}
+          />
+
+          <div className="flex-1 relative bg-muted/30">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center space-y-4 p-8">
+                <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
+                  <span className="text-3xl">✏️</span>
+                </div>
+                <h2 className="text-2xl font-bold">QA Annotation Mode</h2>
+                <p className="text-muted-foreground max-w-md">
+                  Use the tools above to annotate screenshots. Draw rectangles, arrows, add text, or
+                  freehand draw to mark bugs and issues.
+                </p>
+              </div>
             </div>
-            <h2 className="text-2xl font-bold">QA Mode Coming Soon</h2>
-            <p className="text-muted-foreground max-w-md">
-              QA Mode will provide comprehensive testing tools including screenshot comparisons,
-              annotation features, and bug reporting workflows.
-            </p>
+
+            <AnnotationCanvas
+              width={800}
+              height={600}
+              annotations={currentAnnotations}
+              tool={annotationTool}
+              color={annotationColor}
+              onAnnotationAdd={addCurrentAnnotation}
+              showAnnotations={true}
+            />
           </div>
         </div>
       )}

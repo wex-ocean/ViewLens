@@ -17,6 +17,11 @@ interface ViewLensStore {
   isMultiScreen: boolean
   multiScreenDevices: DevicePreset[]
   isSyncScroll: boolean
+  annotationTool: "rectangle" | "arrow" | "text" | "freehand"
+  annotationColor: string
+  currentAnnotations: Annotation[]
+  undoStack: Annotation[][]
+  redoStack: Annotation[][]
   setScreenshots: (screenshots: Screenshot[]) => void
   addScreenshot: (screenshot: Screenshot) => void
   removeScreenshot: (id: string) => void
@@ -34,6 +39,13 @@ interface ViewLensStore {
   removeMultiScreenDevice: () => void
   updateMultiScreenDevice: (index: number, device: DevicePreset) => void
   setIsSyncScroll: (isSyncScroll: boolean) => void
+  setAnnotationTool: (tool: "rectangle" | "arrow" | "text" | "freehand") => void
+  setAnnotationColor: (color: string) => void
+  addCurrentAnnotation: (annotation: Annotation) => void
+  setCurrentAnnotations: (annotations: Annotation[]) => void
+  undo: () => void
+  redo: () => void
+  clearAnnotations: () => void
 }
 
 export const useViewLensStore = create<ViewLensStore>((set) => ({
@@ -52,6 +64,11 @@ export const useViewLensStore = create<ViewLensStore>((set) => ({
   isMultiScreen: false,
   multiScreenDevices: [DEVICE_PRESETS.iphone14Pro, DEVICE_PRESETS.ipadPro12],
   isSyncScroll: false,
+  annotationTool: "rectangle",
+  annotationColor: "#FF0000",
+  currentAnnotations: [],
+  undoStack: [],
+  redoStack: [],
 
   setScreenshots: (screenshots) => set({ screenshots }),
 
@@ -116,5 +133,47 @@ export const useViewLensStore = create<ViewLensStore>((set) => ({
       multiScreenDevices: state.multiScreenDevices.map((d, i) => (i === index ? device : d))
     })),
 
-  setIsSyncScroll: (isSyncScroll) => set({ isSyncScroll })
+  setIsSyncScroll: (isSyncScroll) => set({ isSyncScroll }),
+
+  setAnnotationTool: (tool) => set({ annotationTool: tool }),
+
+  setAnnotationColor: (color) => set({ annotationColor: color }),
+
+  addCurrentAnnotation: (annotation) =>
+    set((state) => ({
+      undoStack: [...state.undoStack, state.currentAnnotations],
+      redoStack: [],
+      currentAnnotations: [...state.currentAnnotations, annotation]
+    })),
+
+  setCurrentAnnotations: (annotations) => set({ currentAnnotations: annotations }),
+
+  undo: () =>
+    set((state) => {
+      if (state.undoStack.length === 0) return state
+      const previous = state.undoStack[state.undoStack.length - 1]
+      return {
+        undoStack: state.undoStack.slice(0, -1),
+        redoStack: [...state.redoStack, state.currentAnnotations],
+        currentAnnotations: previous
+      }
+    }),
+
+  redo: () =>
+    set((state) => {
+      if (state.redoStack.length === 0) return state
+      const next = state.redoStack[state.redoStack.length - 1]
+      return {
+        undoStack: [...state.undoStack, state.currentAnnotations],
+        redoStack: state.redoStack.slice(0, -1),
+        currentAnnotations: next
+      }
+    }),
+
+  clearAnnotations: () =>
+    set((state) => ({
+      undoStack: [...state.undoStack, state.currentAnnotations],
+      redoStack: [],
+      currentAnnotations: []
+    }))
 }))
