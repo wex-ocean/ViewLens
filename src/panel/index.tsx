@@ -1,5 +1,5 @@
 import "~style.css"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import {
   Navbar,
   DeviceFrame,
@@ -12,7 +12,8 @@ import {
   AnnotationCanvas,
   AnnotationToolbar,
   ComparisonView,
-  ComparisonToolbar
+  ComparisonToolbar,
+  SettingsModal
 } from "~components"
 import { useViewLensStore } from "~store"
 import { storage } from "~utils/storage"
@@ -23,6 +24,7 @@ import { db } from "~utils/indexedDB"
 import type { Screenshot } from "~types"
 
 function IndexPanel() {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const {
     activeMode,
     selectedDevice,
@@ -41,6 +43,8 @@ function IndexPanel() {
     comparisonUrls,
     comparisonLabels,
     comparisonSyncScroll,
+    customPresets,
+    urlHistory,
     setActiveMode,
     setSelectedDevice,
     setCurrentUrl,
@@ -61,7 +65,10 @@ function IndexPanel() {
     setIsComparisonMode,
     setComparisonUrls,
     setComparisonLabels,
-    setComparisonSyncScroll
+    setComparisonSyncScroll,
+    addCustomPreset,
+    removeCustomPreset,
+    setUrlHistory
   } = useViewLensStore()
 
   useEffect(() => {
@@ -136,7 +143,25 @@ function IndexPanel() {
 
   return (
     <div className="w-full h-screen flex flex-col bg-background">
-      <Navbar activeMode={activeMode} onModeSwitch={setActiveMode} />
+      <Navbar
+        activeMode={activeMode}
+        onModeSwitch={setActiveMode}
+        onSettingsClick={() => setIsSettingsOpen(true)}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        customPresets={customPresets}
+        urlHistory={urlHistory}
+        onAddPreset={addCustomPreset}
+        onDeletePreset={removeCustomPreset}
+        onSelectUrl={setCurrentUrl}
+        onDeleteUrl={(id) =>
+          setUrlHistory(urlHistory.filter((h) => h.id !== id))
+        }
+        onClearHistory={() => setUrlHistory([])}
+      />
 
       {activeMode === "dev" ? (
         <div className="flex flex-1 flex-col overflow-hidden">

@@ -3,9 +3,10 @@ import { ModeSwitch } from "./ModeSwitch"
 interface NavbarProps {
   activeMode: "dev" | "qa"
   onModeSwitch: (mode: "dev" | "qa") => void
+  onSettingsClick: () => void
 }
 
-export const Navbar = ({ activeMode, onModeSwitch }: NavbarProps) => {
+export const Navbar = ({ activeMode, onModeSwitch, onSettingsClick }: NavbarProps) => {
   return (
     <nav className="flex items-center justify-between px-6 py-4 bg-background border-b border-border">
       <div className="flex items-center gap-2">
@@ -18,6 +19,7 @@ export const Navbar = ({ activeMode, onModeSwitch }: NavbarProps) => {
       <ModeSwitch activeMode={activeMode} onSwitch={onModeSwitch} />
 
       <button
+        onClick={onSettingsClick}
         className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-muted transition-colors"
         aria-label="Settings">
         <svg
