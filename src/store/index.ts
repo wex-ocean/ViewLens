@@ -2,6 +2,7 @@ import { create } from "zustand"
 import type { Annotation, Screenshot, Settings } from "~types"
 import type { DevicePreset } from "~utils/devices"
 import { DEVICE_PRESETS } from "~utils/devices"
+import { storage } from "~utils/storage"
 
 interface ViewLensStore {
   screenshots: Screenshot[]
@@ -10,6 +11,7 @@ interface ViewLensStore {
   selectedDevice: DevicePreset
   currentUrl: string
   isRotated: boolean
+  activeMode: "dev" | "qa"
   setScreenshots: (screenshots: Screenshot[]) => void
   addScreenshot: (screenshot: Screenshot) => void
   removeScreenshot: (id: string) => void
@@ -20,6 +22,7 @@ interface ViewLensStore {
   setSelectedDevice: (device: DevicePreset) => void
   setCurrentUrl: (url: string) => void
   setIsRotated: (isRotated: boolean) => void
+  setActiveMode: (mode: "dev" | "qa") => void
 }
 
 export const useViewLensStore = create<ViewLensStore>((set) => ({
@@ -33,6 +36,7 @@ export const useViewLensStore = create<ViewLensStore>((set) => ({
   selectedDevice: DEVICE_PRESETS.iphone14Pro,
   currentUrl: "https://example.com",
   isRotated: false,
+  activeMode: "dev",
 
   setScreenshots: (screenshots) => set({ screenshots }),
 
@@ -65,5 +69,10 @@ export const useViewLensStore = create<ViewLensStore>((set) => ({
 
   setCurrentUrl: (url) => set({ currentUrl: url }),
 
-  setIsRotated: (isRotated) => set({ isRotated })
+  setIsRotated: (isRotated) => set({ isRotated }),
+
+  setActiveMode: (mode) => {
+    set({ activeMode: mode })
+    storage.set("activeMode", mode)
+  }
 }))

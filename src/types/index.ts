@@ -29,7 +29,7 @@ export interface Settings {
   autoSave: boolean
 }
 
-export type StorageKey = "screenshots" | "settings" | "state"
+export type StorageKey = "screenshots" | "settings" | "state" | "activeMode"
 
 export interface DeviceFrameProps {
   url: string
