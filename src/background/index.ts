@@ -13,7 +13,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "OPEN_SIDE_PANEL") {
-    chrome.sidePanel.open({ windowId: sender.tab?.windowId })
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tab = tabs[0]
+      if (tab?.windowId) {
+        chrome.sidePanel.open({ windowId: tab.windowId }).catch((error) => {
+          console.error("Failed to open side panel:", error)
+        })
+      }
+    })
   }
 })
 
